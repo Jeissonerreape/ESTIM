@@ -1,0 +1,9 @@
+{
+  // Workspace-level interpreter default: point to backend .venv
+  "python.defaultInterpreterPath": "${workspaceFolder}/apps/python-backend/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": ["${workspaceFolder}/apps/python-backend/src"],
+  "files.exclude": {
+    "**/.venv": true,
+    "**/venv": true
+  }
+}

@@ -1,0 +1,21 @@
+# Virtual environment folders
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# dotenv
+.env
+.env.*
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# Build / packaging
+dist/
+build/

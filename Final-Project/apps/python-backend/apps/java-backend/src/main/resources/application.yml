@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: java-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/estim
+    username: estim
+    password: estim
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+server:
+  port: 8080
+
+security:
+  jwt:
+    secret: "change-me-dev-secret-at-least-32-chars-long"
+    access-token-ttl: "PT15M"
+    refresh-token-ttl: "P7D"
+
+  password-reset:
+    reset-base-url: "http://localhost:5173/reset-password?token="
+    token-ttl: "PT1H"
+
+bcrypt:
+  strength: 12

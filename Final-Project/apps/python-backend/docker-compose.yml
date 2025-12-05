@@ -1,0 +1,97 @@
+
+services:
+  db:
+    image: postgres:16
+    container_name: estim_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7
+    container_name: estim_redis
+    ports:
+      - "${REDIS_PORT}:6379"
+
+  java-backend:
+    build:
+      context: ./apps/java-backend
+      dockerfile: Dockerfile
+    container_name: estim_java_backend
+    environment:
+      SPRING_APPLICATION_NAME: java-api
+      SERVER_PORT: 8080
+
+      # === DB/JPA configuration via env (Option B) ===
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+
+      # Adjust these according to how your schema is managed:
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate   # or update / none / create-drop
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+    depends_on:
+      - redis
+      - db
+    ports:
+      - "${JAVA_API_PORT}:8080"
+
+  python-backend:
+    build:
+      context: ./apps/python-backend
+      dockerfile: Dockerfile
+    container_name: estim_python_backend
+    environment:
+      PYTHONUNBUFFERED: "1"
+      # If later you connect to Postgres/Redis from python:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      ESTIM_CORS_ORIGINS: "http://localhost:${WEB_PORT},https://jujgomezru.github.io"
+    depends_on:
+      - redis
+      - db
+    ports:
+      - "${PY_API_PORT}:8000"
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: estim_web
+    environment:
+      # Vite envs for hitting the APIs from the browser
+      VITE_JAVA_API_BASE: http://localhost:${JAVA_API_PORT}
+      VITE_PY_API_BASE:   http://localhost:${PY_API_PORT}
+    depends_on:
+      - java-backend
+      - python-backend
+    ports:
+      - "${WEB_PORT}:5173"
+
+  adminer:
+    image: adminer
+    container_name: estim_adminer
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "8081:8080"
+
+
+volumes:
+  pgdata:

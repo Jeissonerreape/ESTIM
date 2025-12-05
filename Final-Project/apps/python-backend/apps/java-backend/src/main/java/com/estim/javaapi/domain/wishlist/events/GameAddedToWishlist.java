@@ -1,0 +1,37 @@
+package com.estim.javaapi.domain.wishlist.events;
+
+import com.estim.javaapi.domain.common.AbstractDomainEvent;
+import com.estim.javaapi.domain.library.GameId;
+import com.estim.javaapi.domain.user.UserId;
+
+import java.util.Objects;
+
+/**
+ * Domain event fired when a user adds a game to their wishlist.
+ */
+public final class GameAddedToWishlist extends AbstractDomainEvent {
+
+    private final UserId userId;
+    private final GameId gameId;
+
+    public GameAddedToWishlist(UserId userId, GameId gameId) {
+        this.userId = Objects.requireNonNull(userId, "userId must not be null");
+        this.gameId = Objects.requireNonNull(gameId, "gameId must not be null");
+    }
+
+    public UserId getUserId() {
+        return userId;
+    }
+
+    public GameId getGameId() {
+        return gameId;
+    }
+
+    @Override
+    public String toString() {
+        return "GameAddedToWishlist{" +
+            "userId=" + userId +
+            ", gameId=" + gameId +
+            '}';
+    }
+}
